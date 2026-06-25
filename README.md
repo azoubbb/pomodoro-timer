@@ -7,8 +7,7 @@ Lightweight tray-resident Pomodoro timer built with Electron.
 - Drift-free timer (accurate even after sleep / wake)
 - System tray with running/paused icons, dynamic tooltip, and context menu
 - Global shortcuts: `Ctrl+Shift+P` (show/hide), `Ctrl+Shift+S` (start/pause), `Ctrl+Shift+R` (reset)
-- Task list with per-task pomodoro counter
-- Light / dark theme
+- Task list with per-task pomodoro counter and auto-advance on completion
 - Native OS notifications
 - Persistent settings, tasks, and crash-recoverable timer state
 
@@ -47,6 +46,6 @@ Outputs land in `release/`.
 ## Data Storage
 
 All persistent state lives under Electron's `userData` directory:
-- `settings.json` — durations, theme, sound
+- `settings.json` — durations, sound, auto-start flags
 - `tasks.json` — task list
 - `state.json` — current timer phase / `endsAt` (for crash recovery)
