@@ -225,6 +225,16 @@ function main() {
   // Windows .ico wrapper around the 256x256 PNG (PNG-in-ICO is supported on Vista+).
   fs.writeFileSync(path.join(projectRoot, 'build', 'icon.ico'), buildIco([png256]));
   console.log('wrote build/icon.ico');
+
+  // macOS .icns — generate all standard sizes (16..1024) from the same tomato.
+  const icnsPngs = new Map();
+  for (const sz of [16, 32, 64, 128, 256, 512, 1024]) {
+    const t = drawTomato(sz);
+    icnsPngs.set(sz, buildPng(t.size, t.size, t.data));
+  }
+  const icnsPath = path.join(projectRoot, 'build', 'icon.icns');
+  fs.writeFileSync(icnsPath, buildIcns(icnsPngs));
+  console.log(`wrote ${icnsPath}`);
 }
 
 // --- .ico wrapper (PNG payload, single entry) -------------------------------
@@ -257,6 +267,39 @@ function buildIco(pngBufs) {
     header.writeUInt32LE(e.offset, base + 12);          // offset
   });
   return Buffer.concat([header, ...entries.map((e) => e.png)]);
+}
+
+// --- .icns wrapper (macOS icon container) -----------------------------------
+
+// Standard PNG-based ICNS type codes → pixel size.
+const ICNS_TYPES = [
+  { type: 'icp4', size: 16   },
+  { type: 'icp5', size: 32   },
+  { type: 'icp6', size: 64   },
+  { type: 'ic07', size: 128  },
+  { type: 'ic08', size: 256  },
+  { type: 'ic09', size: 512  },
+  { type: 'ic10', size: 1024 },
+];
+
+function buildIcns(pngBufsBySize /* Map<number, Buffer> */) {
+  // Build entries for every size we have a PNG for.
+  const entries = [];
+  for (const { type, size } of ICNS_TYPES) {
+    const png = pngBufsBySize.get(size);
+    if (!png) continue;
+    const entryHeader = Buffer.alloc(8);
+    entryHeader.write(type, 0, 4, 'ascii');           // OSType
+    entryHeader.writeUInt32BE(8 + png.length, 4);     // length (header + data)
+    entries.push(Buffer.concat([entryHeader, png]));
+  }
+
+  const totalSize = 8 + entries.reduce((s, e) => s + e.length, 0);
+  const header = Buffer.alloc(8);
+  header.write('icns', 0, 4, 'ascii');
+  header.writeUInt32BE(totalSize, 4);
+
+  return Buffer.concat([header, ...entries]);
 }
 
 if (require.main === module) {
