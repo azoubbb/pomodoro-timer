@@ -1,6 +1,6 @@
 {
   "name": "pomodoro-timer",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Lightweight tray-resident Pomodoro timer",
   "main": "src/main/main.js",
   "author": "azoubbb <azoubbb@users.noreply.github.com>",
