@@ -15,15 +15,20 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
+            platform: linux
             artifact: |
               release/*.AppImage
               release/*.deb
           - os: windows-latest
+            platform: win
             artifact: release/*.exe
           - os: macos-latest
+            platform: mac
             artifact: release/*.dmg
 
     runs-on: ${{ matrix.os }}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4
@@ -37,23 +42,8 @@ jobs:
       - name: Generate app icons
         run: node scripts/gen-icons.js
 
-      - name: Build (Linux)
-        if: runner.os == 'Linux'
-        run: npx electron-builder --linux
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build (Windows)
-        if: runner.os == 'Windows'
-        run: npx electron-builder --win
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build (macOS)
-        if: runner.os == 'macOS'
-        run: npx electron-builder --mac
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build
+        run: npx electron-builder --${{ matrix.platform }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
