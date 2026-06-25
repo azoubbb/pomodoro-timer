@@ -132,7 +132,9 @@ export function createTaskList({ api, root }) {
   return {
     refresh,
     setActiveFromTimer: (id) => {
-      activeId = id || '';
+      const next = id || '';
+      if (next === activeId) return; // no change — skip DOM rebuild
+      activeId = next;
       renderList();
       renderPicker();
     },

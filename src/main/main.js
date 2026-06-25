@@ -84,11 +84,13 @@ app.whenReady().then(() => {
   const timer = createTimer(store);
 
   // Wire IPC handlers (they reference timer + store).
-  registerIpc({ timer, store });
+  registerIpc({ timer, store, getWin });
 
-  // Tray + global shortcuts.
-  registerTray({ win: mainWindow, timer });
-  registerShortcuts({ win: mainWindow, timer });
+  // Tray + global shortcuts. Use a getter so macOS activate handler works
+  // when the window is destroyed and re-created.
+  const getWin = () => mainWindow;
+  registerTray({ getWin, timer });
+  registerShortcuts({ getWin, timer });
 
   // Broadcast timer state to the renderer on every tick and phase change.
   const broadcast = (state) => {

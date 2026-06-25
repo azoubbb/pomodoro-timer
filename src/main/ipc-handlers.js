@@ -11,7 +11,7 @@ function ok(value) {
   return value === undefined ? { ok: true } : value;
 }
 
-function registerIpc({ timer, store }) {
+function registerIpc({ timer, store, getWin }) {
   // --- Timer ----------------------------------------------------------------
   ipcMain.handle('timer:getState', () => timer.getState());
   ipcMain.handle('timer:start',    () => timer.start());
@@ -37,10 +37,15 @@ function registerIpc({ timer, store }) {
   ipcMain.handle('tasks:delete',     (_e, { id }) => store.deleteTask(id));
 
   // --- App ------------------------------------------------------------------
-  ipcMain.handle('app:hideToTray', () => ok());
+  ipcMain.handle('app:hideToTray', () => {
+    const win = getWin();
+    if (win && !win.isDestroyed()) win.hide();
+    return ok();
+  });
   ipcMain.handle('app:quit', () => {
-    require('electron').app.isQuitting = true;
-    require('electron').app.quit();
+    const { app } = require('electron');
+    app.isQuitting = true;
+    app.quit();
     return ok();
   });
 }

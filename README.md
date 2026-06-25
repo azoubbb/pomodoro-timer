@@ -16,7 +16,7 @@
 
 ```bash
 npm install
-npm run gen-icons   # 首次运行:用纯 Node 生成 PNG 图标资源
+npm run gen-assets  # 首次运行:生成图标 + 提示音(或分别运行 gen-icons / gen-sound)
 npm start
 ```
 

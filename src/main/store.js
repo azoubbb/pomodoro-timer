@@ -86,11 +86,28 @@ function getSettings() {
   return merged;
 }
 
+const SETTINGS_RANGES = {
+  workDuration:        [1, 180],
+  shortBreakDuration:  [1, 60],
+  longBreakDuration:   [1, 120],
+  longBreakInterval:   [1, 10],
+};
+
 function setSettings(patch) {
   init();
   const clean = {};
   for (const [k, v] of Object.entries(patch || {})) {
-    if (SETTINGS_KEYS.includes(k)) clean[k] = v;
+    if (!SETTINGS_KEYS.includes(k)) continue;
+    if (SETTINGS_RANGES[k]) {
+      const [min, max] = SETTINGS_RANGES[k];
+      const n = Number(v);
+      if (!Number.isFinite(n)) continue;
+      clean[k] = Math.min(max, Math.max(min, Math.round(n)));
+    } else if (typeof v === 'boolean') {
+      clean[k] = v;
+    } else {
+      clean[k] = Boolean(v);
+    }
   }
   settings.set(clean);
   return getSettings();

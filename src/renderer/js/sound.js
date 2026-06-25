@@ -19,14 +19,15 @@ export function createSound({ api }) {
   }
 
   // Browsers require a user gesture before Audio can play. We unlock on the
-  // first click anywhere in the document.
-  document.addEventListener('click', () => {
-    if (unlocked) return;
+  // first click anywhere in the document, then remove the listener.
+  function unlock() {
     const a = ensureAudio();
     if (a) {
       a.play().then(() => { a.pause(); a.currentTime = 0; unlocked = true; }).catch(() => {});
     }
-  }, { once: false });
+    document.removeEventListener('click', unlock);
+  }
+  document.addEventListener('click', unlock);
 
   async function playTick() {
     const settings = await api.settingsGet();

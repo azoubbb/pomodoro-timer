@@ -45,7 +45,7 @@ function toggleWindow(win) {
   }
 }
 
-function registerTray({ win, timer }) {
+function registerTray({ getWin, timer }) {
   const runningIconPath = rendererAsset('tray-running.png');
   const pausedIconPath = rendererAsset('tray-paused.png');
 
@@ -69,7 +69,14 @@ function registerTray({ win, timer }) {
     lastIcon = want;
   };
 
-  const onShowHide = () => toggleWindow(win);
+  let lastMenuState = '';
+  const rebuildMenuIfNeeded = (runState) => {
+    if (runState === lastMenuState) return;
+    lastMenuState = runState;
+    tray.setContextMenu(buildMenu(getWin(), timer, onShowHide, onStartPause, onSkip, onQuit));
+  };
+
+  const onShowHide = () => toggleWindow(getWin());
   const onStartPause = () => {
     const s = timer.getState();
     if (s.runState === 'running') timer.pause();
@@ -85,17 +92,17 @@ function registerTray({ win, timer }) {
   tray.setToolTip('Pomodoro');
   tray.on('click', onShowHide);
   tray.on('right-click', () => {
-    tray.popUpContextMenu(buildMenu(win, timer, onShowHide, onStartPause, onSkip, onQuit));
+    tray.popUpContextMenu(buildMenu(getWin(), timer, onShowHide, onStartPause, onSkip, onQuit));
   });
 
   function refresh(state) {
     const s = state || timer.getState();
     setIconForState(s.runState);
     const label = s.runState === 'paused'
-      ? `Paused ${formatRemaining(s.remainingMs)}`
-      : `${capitalize(PHASE_LABELS[s.phase] || s.phase)} ${formatRemaining(s.remainingMs)}`;
+      ? `已暂停 ${formatRemaining(s.remainingMs)}`
+      : `${PHASE_LABELS[s.phase] || s.phase} ${formatRemaining(s.remainingMs)}`;
     tray.setToolTip(`Pomodoro — ${label}`);
-    tray.setContextMenu(buildMenu(win, timer, onShowHide, onStartPause, onSkip, onQuit));
+    rebuildMenuIfNeeded(s.runState);
   }
 
   refresh();

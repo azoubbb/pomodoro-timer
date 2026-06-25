@@ -44,7 +44,7 @@ function createTimer(store) {
   let saved = store.loadState();
   // `currentTaskId` is intentionally kept on the engine, not in state.json,
   // because it's not part of the timer phase state — it survives restarts.
-  let currentTaskId = null;
+  let currentTaskId = saved.currentTaskId || null;
 
   let phase = saved.currentPhase || 'work';
   let endsAt = null;
@@ -72,6 +72,7 @@ function createTimer(store) {
     remainingMs = durationForPhase(phase, settings);
     runState = 'idle';
     endsAt = null;
+    persist();
   }
 
   // --- Helpers --------------------------------------------------------------

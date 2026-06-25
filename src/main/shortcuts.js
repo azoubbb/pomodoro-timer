@@ -14,18 +14,11 @@ const BINDINGS = [
   { accelerator: 'CommandOrControl+Shift+R', label: '重置当前阶段' },
 ];
 
-function notifyMissing(accelerator) {
-  if (!Notification.isSupported()) return;
-  new Notification({
-    title: '快捷键不可用',
-    body: `无法注册 ${accelerator},可能被其他程序占用。`,
-    silent: true,
-  }).show();
-}
-
-function registerShortcuts({ win, timer }) {
+function registerShortcuts({ getWin, timer }) {
   const handlers = {
     'CommandOrControl+Shift+P': () => {
+      const win = getWin();
+      if (win.isDestroyed()) return;
       if (win.isVisible() && !win.isMinimized()) win.hide();
       else {
         if (win.isMinimized()) win.restore();
