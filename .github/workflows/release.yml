@@ -1,0 +1,71 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact: release/*.AppImage release/*.deb
+          - os: windows-latest
+            artifact: release/*.exe
+          - os: macos-latest
+            artifact: release/*.dmg
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - name: Generate app icons
+        run: node scripts/gen-icons.js
+
+      - name: Build (Linux)
+        if: runner.os == 'Linux'
+        run: npx electron-builder --linux
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: npx electron-builder --win
+
+      - name: Build (macOS)
+        if: runner.os == 'macOS'
+        run: npx electron-builder --mac
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.os }}
+          path: ${{ matrix.artifact }}
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          path: artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          generate_release_notes: true
+          files: artifacts/*

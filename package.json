@@ -9,6 +9,7 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron . --enable-logging",
+    "test": "node scripts/smoke-test.js",
     "gen-icons": "node scripts/gen-icons.js",
     "gen-sound": "node scripts/gen-sound.js",
     "gen-assets": "npm run gen-icons && npm run gen-sound",
