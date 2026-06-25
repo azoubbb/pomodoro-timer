@@ -1,0 +1,29 @@
+/* theme.css — design tokens.
+ * Light palette: warm / soft / clean (浅色 UI 配色方案)
+ *   主色 #C65A4A  背景 #F7F2EC  辅助 #EAE3DB
+ *   浅辅助 #F1EBE0  高亮 #FBDCCF  弱化 #D9D2CC
+ *   文本 #6F655E  分隔线 #E5E0DA
+ */
+
+:root {
+  --bg: #F7F2EC;          /* 背景 */
+  --fg: #6F655E;          /* 文本 */
+  --muted: #9C9389;       /* derived: midway between fg and bg */
+  --accent: #C65A4A;      /* 主色 */
+  --accent-soft: rgba(198, 90, 74, 0.14);
+  --border: #E5E0DA;      /* 分隔线/轮廓 */
+  --hover: #FBDCCF;       /* 高亮 (hover/selected surface) */
+  --subtle: #F1EBE0;      /* 浅辅助 (secondary surface) */
+  --muted-bg: #D9D2CC;    /* 弱化 (disabled) */
+  --btn-bg: #FFFFFF;
+  --input-bg: #FFFFFF;
+
+  --ring-track: #EAE3DB;      /* 辅助 */
+  --ring-progress: #C65A4A;   /* 主色 */
+
+  --phase-work: #C65A4A;      /* 主色 — work */
+  --phase-short: #8FA67D;     /* sage green — short break */
+  --phase-long: #7C92A6;      /* slate blue — long break */
+}
+
+body { transition: background 0.2s, color 0.2s; }

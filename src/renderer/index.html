@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; media-src 'self';" />
+  <title>番茄钟</title>
+  <link rel="stylesheet" href="styles/base.css" />
+  <link rel="stylesheet" href="styles/theme.css" />
+  <link rel="stylesheet" href="styles/timer.css" />
+</head>
+<body>
+  <header class="app-header">
+    <span id="phase-label" class="phase-pill phase-work">专注</span>
+    <div class="header-actions">
+      <span id="cycle-indicator" class="cycle-indicator" title="本轮已完成的番茄数"></span>
+      <button id="open-settings" class="icon-btn" aria-label="打开设置" title="设置">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="timer" aria-label="计时器">
+    <div class="timer-ring">
+      <svg viewBox="0 0 200 200" aria-hidden="true">
+        <circle class="ring-track" cx="100" cy="100" r="90" />
+        <!-- rotate(+90) moves the implicit path start (originally at 3 o'clock
+             after the horizontal flip) up to 12 o'clock. scale(-1,1) +
+             translate(-200 0) reverse the implicit path direction so progress
+             sweeps CLOCKWISE. Net: start at 12 o'clock, sweep 12 → 3 → 6 → 9. -->
+        <circle id="ring-progress" class="ring-progress" cx="100" cy="100" r="90"
+                transform="rotate(90 100 100) scale(-1 1) translate(-200 0)" />
+      </svg>
+      <div class="timer-text">
+        <div id="time-display" class="time">25:00</div>
+        <div id="phase-status" class="phase-status">就绪</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="btn-start" class="btn btn-primary">开始</button>
+      <button id="btn-reset" class="btn">重置</button>
+      <button id="btn-skip" class="btn">跳过</button>
+    </div>
+  </main>
+
+  <section class="active-task" aria-label="当前任务">
+    <label for="task-picker" class="muted small">当前任务</label>
+    <select id="task-picker" class="task-picker">
+      <option value="">— 无任务 —</option>
+    </select>
+  </section>
+
+  <section class="tasks" aria-label="任务列表">
+    <form id="task-form" class="task-form">
+      <input id="task-input" type="text" placeholder="添加任务,按回车确认…" maxlength="200" autocomplete="off" />
+      <button type="submit" class="btn btn-small">添加</button>
+    </form>
+    <ul id="task-list" class="task-list"></ul>
+    <p id="task-empty" class="muted small empty-hint">暂无任务</p>
+  </section>
+
+  <!-- 设置抽屉 -->
+  <aside id="settings-drawer" class="drawer" hidden aria-hidden="true" aria-label="设置">
+    <div class="drawer-backdrop" data-close></div>
+    <div class="drawer-panel" role="dialog" aria-modal="true">
+      <header class="drawer-header">
+        <h2>设置</h2>
+        <button class="icon-btn" data-close aria-label="关闭设置">✕</button>
+      </header>
+      <div class="drawer-body">
+        <fieldset>
+          <legend>时长(分钟)</legend>
+          <label>专注 <input type="number" id="set-work" min="1" max="180" /></label>
+          <label>短休息 <input type="number" id="set-short" min="1" max="60" /></label>
+          <label>长休息 <input type="number" id="set-long" min="1" max="120" /></label>
+          <label>每 <input type="number" id="set-interval" min="2" max="12" /> 个专注后长休息</label>
+        </fieldset>
+
+        <fieldset>
+          <legend>行为</legend>
+          <label class="row">
+            <input type="checkbox" id="set-autobreak" />
+            <span>自动开始休息</span>
+          </label>
+          <label class="row">
+            <input type="checkbox" id="set-autowork" />
+            <span>自动开始下一轮专注</span>
+          </label>
+          <label class="row">
+            <input type="checkbox" id="set-sound" />
+            <span>通知音效</span>
+          </label>
+        </fieldset>
+
+        <div class="drawer-actions">
+          <button id="save-settings" class="btn btn-primary">保存</button>
+          <button class="btn" data-close>取消</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
