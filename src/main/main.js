@@ -83,12 +83,12 @@ app.whenReady().then(() => {
   mainWindow = createWindow();
   const timer = createTimer(store);
 
+  // Getter so tray/shortcuts/IPCs always see the latest window reference
+  // (needed for macOS activate handler which re-creates the window).
+  const getWin = () => mainWindow;
+
   // Wire IPC handlers (they reference timer + store).
   registerIpc({ timer, store, getWin });
-
-  // Tray + global shortcuts. Use a getter so macOS activate handler works
-  // when the window is destroyed and re-created.
-  const getWin = () => mainWindow;
   registerTray({ getWin, timer });
   registerShortcuts({ getWin, timer });
 
